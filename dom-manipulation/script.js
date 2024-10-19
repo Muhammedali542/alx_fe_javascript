@@ -36,6 +36,16 @@ function populateCategories() {
   filterQuotes(); // Apply the filter when page is loaded
 }
 
+// Show a random quote
+function showRandomQuote() {
+  const quoteDisplay = document.getElementById("quoteDisplay");
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const randomQuote = quotes[randomIndex];
+
+  // Display the random quote
+  quoteDisplay.innerHTML = `"${randomQuote.text}" - Category: ${randomQuote.category}`;
+}
+
 // Filter quotes based on selected category
 function filterQuotes() {
   const selectedCategory = document.getElementById("categoryFilter").value;
@@ -53,7 +63,7 @@ function filterQuotes() {
   // Clear current displayed quotes
   quoteDisplay.innerHTML = "";
 
-  // Display filtered quotes
+  // Display filtered quotes or a message if none found
   if (filteredQuotes.length > 0) {
     filteredQuotes.forEach((quote) => {
       const quoteElement = document.createElement("p");
@@ -88,8 +98,12 @@ function addQuote() {
   // Update the categories dropdown in case a new category is added
   populateCategories();
 
+  // Clear input fields
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
+
+  // Show a random quote after adding a new one
+  showRandomQuote();
 }
 
 // Save the updated quotes array to localStorage
@@ -99,3 +113,4 @@ function saveQuotes() {
 
 // Load the quotes and populate categories on page load
 populateCategories();
+showRandomQuote(); // Show an initial random quote
