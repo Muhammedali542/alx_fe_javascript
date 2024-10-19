@@ -13,10 +13,51 @@ async function fetchQuotesFromServer() {
   }));
 }
 
+// Post a new quote to the server
+async function postQuoteToServer(quote) {
+  const response = await fetch(SERVER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: quote.text,
+      body: "Quote body can include additional info", // Adjust as necessary
+      category: quote.category,
+    }),
+  });
+  return response.json(); // Return the posted quote data if needed
+}
+
+// Sync local quotes with server quotes
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+
+  // Conflict resolution: Update local quotes with server data if they differ
+  serverQuotes.forEach((serverQuote) => {
+    const existingQuoteIndex = quotes.findIndex(
+      (q) => q.text === serverQuote.text
+    );
+    if (existingQuoteIndex === -1) {
+      // If the quote doesn't exist locally, add it
+      quotes.push(serverQuote);
+    } else {
+      // If it exists, you can log or notify the user
+      console.log(
+        `Conflict detected for: "${serverQuote.text}". Existing quote preserved.`
+      );
+    }
+  });
+
+  saveQuotes();
+  populateCategories();
+  filterQuotes(); // Refresh displayed quotes
+}
+
 // Populate the categories dropdown
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
-  const uniqueCategories = [...new Set(quotes.map((quote) => quote.category))]; // Get unique categories
+  const uniqueCategories = [...new Set(quotes.map((quote) => quote.category))];
 
   // Clear existing options except "All Categories"
   categoryFilter.innerHTML = '<option value="all">All Categories</option>';
@@ -76,7 +117,7 @@ function filterQuotes() {
 }
 
 // Add a new quote and update the categories if needed
-function addQuote() {
+async function addQuote() {
   const newQuoteText = document.getElementById("newQuoteText").value.trim();
   const newQuoteCategory = document
     .getElementById("newQuoteCategory")
@@ -95,6 +136,9 @@ function addQuote() {
   quotes.push(newQuote);
   saveQuotes();
 
+  // Post the new quote to the server
+  await postQuoteToServer(newQuote);
+
   // Update the categories dropdown in case a new category is added
   populateCategories();
 
@@ -109,31 +153,6 @@ function addQuote() {
 // Save the updated quotes array to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
-}
-
-// Sync local quotes with server quotes
-async function syncQuotes() {
-  const serverQuotes = await fetchQuotesFromServer();
-
-  // Conflict resolution: Update local quotes with server data if they differ
-  serverQuotes.forEach((serverQuote) => {
-    const existingQuoteIndex = quotes.findIndex(
-      (q) => q.text === serverQuote.text
-    );
-    if (existingQuoteIndex === -1) {
-      // If the quote doesn't exist locally, add it
-      quotes.push(serverQuote);
-    } else {
-      // If it exists, notify the user
-      console.log(
-        `Conflict detected for: "${serverQuote.text}". Existing quote preserved.`
-      );
-    }
-  });
-
-  saveQuotes();
-  populateCategories();
-  filterQuotes(); // Refresh displayed quotes
 }
 
 // Load the quotes and populate categories on page load
