@@ -42,7 +42,7 @@ async function syncQuotes() {
       // If the quote doesn't exist locally, add it
       quotes.push(serverQuote);
     } else {
-      // If it exists, you can log or notify the user
+      // If it exists, notify the user
       console.log(
         `Conflict detected for: "${serverQuote.text}". Existing quote preserved.`
       );
@@ -52,6 +52,9 @@ async function syncQuotes() {
   saveQuotes();
   populateCategories();
   filterQuotes(); // Refresh displayed quotes
+
+  // Success message after syncing
+  alert("Quotes synced with server!");
 }
 
 // Populate the categories dropdown
