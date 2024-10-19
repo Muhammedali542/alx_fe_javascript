@@ -1,5 +1,5 @@
 // Array to store quotes
-let quotes = [
+let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   {
     text: "The only limit to our realization of tomorrow is our doubts of today.",
     category: "Motivation",
@@ -26,6 +26,8 @@ function showRandomQuote() {
 
     // Display the random quote
     quoteDisplay.textContent = `"${randomQuote.text}" - Category: ${randomQuote.category}`;
+
+    sessionStorage.setItem("lastViewedQuote", JSON.stringify(randomQuote));
   } else {
     quoteDisplay.textContent = "No quotes available. Add some quotes!";
   }
@@ -56,6 +58,19 @@ function addQuote() {
   document.getElementById("newQuoteCategory").value = "";
 
   quoteDisplay.innerHTML = `${newQuote.text} - Category: ${newQuote.category}`;
+}
+
+// Function to save the quotes array to localStorage
+function saveQuotes() {
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+}
+
+// Function to load the last viewed quote from sessionStorage
+function loadLastViewedQuote() {
+  const lastViewedQuote = JSON.parse(sessionStorage.getItem("lastViewedQuote"));
+  if (lastViewedQuote) {
+    quoteDisplay.textContent = `"${lastViewedQuote.text}" - Category: ${lastViewedQuote.category}`;
+  }
 }
 
 // Function to dynamically create the form for adding new quotes
@@ -92,4 +107,8 @@ function createAddQuoteForm() {
 // Call the function to create the form on page load
 createAddQuoteForm();
 
+// Load last viewed quote if available
+loadLastViewedQuote();
+
+// Initial display of a random quote
 showRandomQuote();
