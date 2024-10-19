@@ -12,6 +12,14 @@
 
     <h2>Add a New Quote</h2>
 
+    <button onclick="exportQuotesToJson()">Export Quotes to JSON</button>
+    <input
+      type="file"
+      id="importFile"
+      accept=".json"
+      onchange="importFromJsonFile(event)"
+    />
+
     <script src="script.js"></script>
   </body>
 </html>
