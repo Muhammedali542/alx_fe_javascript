@@ -1,17 +1,17 @@
-let quotes = JSON.parse(localStorage.getItem("quotes")) || [
-  {
-    text: "The only limit to our realization of tomorrow is our doubts of today.",
-    category: "Motivation",
-  },
-  {
-    text: "In the end, we will remember not the words of our enemies, but the silence of our friends.",
-    category: "Reflection",
-  },
-  {
-    text: "Life is what happens when you're busy making other plans.",
-    category: "Life",
-  },
-];
+let quotes = JSON.parse(localStorage.getItem("quotes")) || [];
+
+// Mock server URL
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
+
+// Fetch quotes from the server
+async function fetchQuotesFromServer() {
+  const response = await fetch(SERVER_URL);
+  const data = await response.json();
+  return data.map((quote) => ({
+    text: quote.title, // or any other property
+    category: "General", // Set a default category or adjust as necessary
+  }));
+}
 
 // Populate the categories dropdown
 function populateCategories() {
@@ -111,6 +111,34 @@ function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
+// Sync local quotes with server quotes
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+
+  // Conflict resolution: Update local quotes with server data if they differ
+  serverQuotes.forEach((serverQuote) => {
+    const existingQuoteIndex = quotes.findIndex(
+      (q) => q.text === serverQuote.text
+    );
+    if (existingQuoteIndex === -1) {
+      // If the quote doesn't exist locally, add it
+      quotes.push(serverQuote);
+    } else {
+      // If it exists, notify the user
+      console.log(
+        `Conflict detected for: "${serverQuote.text}". Existing quote preserved.`
+      );
+    }
+  });
+
+  saveQuotes();
+  populateCategories();
+  filterQuotes(); // Refresh displayed quotes
+}
+
 // Load the quotes and populate categories on page load
 populateCategories();
 showRandomQuote(); // Show an initial random quote
+
+// Set up periodic syncing (every 10 seconds for demo purposes)
+setInterval(syncQuotes, 10000); // Adjust interval as necessary
